@@ -38,15 +38,11 @@ extern zend_module_entry ip2region_module_entry;
 #include "TSRM.h"
 #endif
 
-/* 
-  	Declare any global variables you may need between the BEGIN
-	and END macros here:     
+
 
 ZEND_BEGIN_MODULE_GLOBALS(ip2region)
-	long  global_value;
-	char *global_string;
+	char *db_file;
 ZEND_END_MODULE_GLOBALS(ip2region)
-*/
 
 /* In every utility function you add that needs to use variables 
    in php_ip2region_globals, call TSRMLS_FETCH(); after declaring other 

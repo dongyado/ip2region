@@ -27,21 +27,17 @@
 #include "ext/standard/info.h"
 #include "php_ip2region.h"
 
-/* If you declare any globals in php_ip2region.h uncomment this:
 ZEND_DECLARE_MODULE_GLOBALS(ip2region)
-*/
 
 /* True global resources - no need for thread safety here */
 static int le_ip2region;
 
 /* {{{ PHP_INI
  */
-/* Remove comments and fill if you need to have entries in php.ini
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("ip2region.global_value",      "42", PHP_INI_ALL, OnUpdateLong, global_value, zend_ip2region_globals, ip2region_globals)
-    STD_PHP_INI_ENTRY("ip2region.global_string", "foobar", PHP_INI_ALL, OnUpdateString, global_string, zend_ip2region_globals, ip2region_globals)
+    //STD_PHP_INI_ENTRY("ip2region.global_value",      "42", PHP_INI_ALL, OnUpdateLong, global_value, zend_ip2region_globals, ip2region_globals)
+    STD_PHP_INI_ENTRY("ip2region.db_file", "", PHP_INI_ALL, OnUpdateString, db_file, zend_ip2region_globals, ip2region_globals)
 PHP_INI_END()
-*/
 /* }}} */
 
 /* Remove the following function when you have successfully modified config.m4
@@ -85,22 +81,19 @@ PHP_FUNCTION(binary_search)
 
 /* {{{ php_ip2region_init_globals
  */
-/* Uncomment this function if you have INI entries
 static void php_ip2region_init_globals(zend_ip2region_globals *ip2region_globals)
 {
-	ip2region_globals->global_value = 0;
-	ip2region_globals->global_string = NULL;
+	ip2region_globals->db_file = NULL;
 }
-*/
 /* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(ip2region)
 {
-	/* If you have INI entries, uncomment these lines 
+	zend_printf(" db_file = %s", IP2REGION_G(db_file));
 	REGISTER_INI_ENTRIES();
-	*/
+	zend_printf(" db_file = %s", IP2REGION_G(db_file));
 	return SUCCESS;
 }
 /* }}} */
@@ -109,9 +102,7 @@ PHP_MINIT_FUNCTION(ip2region)
  */
 PHP_MSHUTDOWN_FUNCTION(ip2region)
 {
-	/* uncomment this line if you have INI entries
 	UNREGISTER_INI_ENTRIES();
-	*/
 	return SUCCESS;
 }
 /* }}} */
@@ -153,7 +144,6 @@ PHP_MINFO_FUNCTION(ip2region)
  * Every user visible function must have an entry in ip2region_functions[].
  */
 const zend_function_entry ip2region_functions[] = {
-	PHP_FE(confirm_ip2region_compiled,	NULL)		/* For testing, remove later. */
 	PHP_FE(binary_search, NULL)
 	PHP_FE(btree_search, NULL)
 	PHP_FE_END	/* Must be the last line in ip2region_functions[] */
