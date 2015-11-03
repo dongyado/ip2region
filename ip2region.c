@@ -49,9 +49,9 @@ PHP_INI_END()
    purposes. */
 
 /* Every user-visible function in PHP should document itself in the source */
-/* {{{ proto string confirm_ip2region_compiled(string arg)
-   Return a string to confirm that the module is compiled in */
-PHP_FUNCTION(confirm_ip2region_compiled)
+
+/* {{{ */
+PHP_FUNCTION(btree_search)
 {
 	char *arg = NULL;
 	int arg_len, len;
@@ -60,11 +60,22 @@ PHP_FUNCTION(confirm_ip2region_compiled)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {
 		return;
 	}
-
-	len = spprintf(&strg, 0, "Congratulations! You have successfully modified ext/%.78s/config.m4. Module %.78s is now compiled into PHP.", "ip2region", arg);
-	RETURN_STRINGL(strg, len, 0);
 }
 /* }}} */
+
+/* {{{ */
+PHP_FUNCTION(binary_search)
+{
+	char *arg = NULL;
+	int arg_len, len;
+	char *strg;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {
+		return;
+	}
+}
+/* }}} */
+
 /* The previous line is meant for vim and emacs, so it can correctly fold and 
    unfold functions in source code. See the corresponding marks just before 
    function definition, where the functions purpose is also documented. Please 
@@ -143,6 +154,8 @@ PHP_MINFO_FUNCTION(ip2region)
  */
 const zend_function_entry ip2region_functions[] = {
 	PHP_FE(confirm_ip2region_compiled,	NULL)		/* For testing, remove later. */
+	PHP_FE(binary_search, NULL)
+	PHP_FE(btree_search, NULL)
 	PHP_FE_END	/* Must be the last line in ip2region_functions[] */
 };
 /* }}} */

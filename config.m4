@@ -13,9 +13,9 @@ dnl [  --with-ip2region             Include ip2region support])
 
 dnl Otherwise use enable:
 
-dnl PHP_ARG_ENABLE(ip2region, whether to enable ip2region support,
-dnl Make sure that the comment is aligned:
-dnl [  --enable-ip2region           Enable ip2region support])
+PHP_ARG_ENABLE(ip2region, whether to enable ip2region support,
+Make sure that the comment is aligned:
+[  --enable-ip2region           Enable ip2region support])
 
 if test "$PHP_IP2REGION" != "no"; then
   dnl Write more examples of tests here...
