@@ -25,8 +25,8 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "php_ip2region.h"
 #include "lib/ip2region.h"
+#include "php_ip2region.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(ip2region)
 
@@ -53,10 +53,26 @@ PHP_FUNCTION(btree_search)
 	char *arg = NULL;
 	int arg_len, len;
 	char *strg;
+	zval * arg1;
+	datablock_t block;
+	ip2region_t resource;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {
+	block 		= emalloc(sizeof(datablock_entry));
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &arg1, &arg, &arg_len) == FAILURE) {
 		return;
 	}
+
+	resource 	= emalloc(sizeof(ip2region_t));
+
+	ZEND_FETCH_RESOURCE( resource, ip2region_t, &arg1, -1, le_ip2region_name, le_ip2region  );
+	
+    ip2region_btree_search_string(resource, arg, block); 
+
+	// return array
+	array_init(return_value);
+	add_assoc_long(return_value, "cityId", block->city_id);
+	add_assoc_string(return_value, "region", block->region, 1);
 }
 /* }}} */
 
@@ -66,10 +82,26 @@ PHP_FUNCTION(binary_search)
 	char *arg = NULL;
 	int arg_len, len;
 	char *strg;
+	zval * arg1;
+	datablock_t block;
+	ip2region_t resource;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {
+	block 		= emalloc(sizeof(datablock_entry));
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &arg1, &arg, &arg_len) == FAILURE) {
 		return;
 	}
+
+	resource 	= emalloc(sizeof(ip2region_t));
+
+	ZEND_FETCH_RESOURCE( resource, ip2region_t, &arg1, -1, le_ip2region_name, le_ip2region  );
+	
+    ip2region_binary_search_string(resource, arg, block); 
+
+	// return array
+	array_init(return_value);
+	add_assoc_long(return_value, "cityId", block->city_id);
+	add_assoc_string(return_value, "region", block->region, 1);
 }
 /* }}} */
 
@@ -88,16 +120,61 @@ static void php_ip2region_init_globals(zend_ip2region_globals *ip2region_globals
 }
 /* }}} */
 
+/** 
+ * destruction
+ * */
+
+void ip2region_destruction_handler(
+	zend_rsrc_list_entry *rsrc TSRMLS_CC
+) {
+	ip2region_t  resource;
+
+	resource = (ip2region_t) rsrc->ptr;
+
+	zend_printf("\n+-- destruction handler called! --+\n");
+
+	fclose(resource->dbHandler);
+
+	// @TODO efree malloc memery
+	efree(resource);
+	
+}
+
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(ip2region)
 {
-	zend_printf(" db_file = %s", IP2REGION_G(db_file));
 	REGISTER_INI_ENTRIES();
-	zend_printf(" db_file = %s", IP2REGION_G(db_file));
+	//zend_printf("\ndb_file = %s\n", IP2REGION_G(db_file));
+
+	le_ip2region = zend_register_list_destructors_ex(
+		ip2region_destruction_handler, NULL, le_ip2region_name, module_number	
+);
+	
 	return SUCCESS;
 }
 /* }}} */
+
+
+/* {{{ create ip2region resource 
+ */
+PHP_FUNCTION(ip2region_create){
+	ip2region_t 	resource;
+	int 			rsrc_id;
+	zval*			res;
+
+	res 		= emalloc(sizeof(zval));
+	resource 	= emalloc(sizeof(ip2region_t));
+
+	if (ip2region_create( resource, IP2REGION_G(db_file)) != 0)
+	{
+		rsrc_id = ZEND_REGISTER_RESOURCE( res, resource, le_ip2region);
+	}
+
+	RETURN_RESOURCE( rsrc_id );
+}
+/* }}} */
+
 
 /* {{{ PHP_MSHUTDOWN_FUNCTION
  */
@@ -146,6 +223,7 @@ PHP_MINFO_FUNCTION(ip2region)
  */
 const zend_function_entry ip2region_functions[] = {
 	PHP_FE(binary_search, NULL)
+	PHP_FE(ip2region_create, NULL)
 	PHP_FE(btree_search, NULL)
 	PHP_FE_END	/* Must be the last line in ip2region_functions[] */
 };

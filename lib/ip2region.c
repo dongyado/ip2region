@@ -31,6 +31,7 @@ IP2R_API uint_t ip2region_create(ip2region_t ip2rObj, char *dbFile)
 		IP2R_FREE(ip2rObj->HeaderSip);
 		return 0;
 	}
+    
 
 	//open the db file
 	ip2rObj->dbHandler = fopen(dbFile, "rb");
