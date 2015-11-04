@@ -10,20 +10,46 @@ $ip2region = ip2region_create();
 function getTime(){
     return microtime(true) * 1000;
 }
+
 $start = getTime();
-var_dump(btree_search($ip2region, "120.24.78.68"));
+$data  = btree_search($ip2region, "120.24.78.68");
 $end   = getTime();
+var_dump($data);
 echo "\n taken: ", ($end - $start), "\n";
 
 $start = getTime();
-var_dump(btree_search($ip2region, "120.24.78.68"));
+$data  = btree_search($ip2region, "120.24.78.68");
 $end   = getTime();
+var_dump($data);
+echo "\n taken: ", ($end - $start), "\n";
+
+
+$start = getTime();
+//var_dump(btree_search($ip2region, "12.24.78.68"));
+$data  = btree_search($ip2region, "12.24.78.68");
+$end   = getTime();
+var_dump($data);
 echo "\n taken: ", ($end - $start), "\n";
 
 //$start = getTime();
-//var_dump(binary_search($ip2region, "120.24.78.68"));
+//var_dump(d_btree_search( "120.24.78.68"));
 //$end   = getTime();
 //echo "\n taken: ", ($end - $start), "\n";
-
+//
+//$start = getTime();
+//var_dump(d_btree_search("120.24.78.68"));
+//$end   = getTime();
+//echo "\n taken: ", ($end - $start), "\n";
+//
+//
+//$start = getTime();
+//var_dump(d_binary_search( "120.24.78.68"));
+//$end   = getTime();
+//echo "\n taken: ", ($end - $start), "\n";
+//
+//$start = getTime();
+//var_dump(d_binary_search("120.24.78.68"));
+//$end   = getTime();
+//echo "\n taken: ", ($end - $start), "\n";
 echo "\n";
 ?>

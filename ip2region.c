@@ -27,12 +27,21 @@
 #include "ext/standard/info.h"
 #include "lib/ip2region.h"
 #include "php_ip2region.h"
+#include <sys/time.h>
 
 ZEND_DECLARE_MODULE_GLOBALS(ip2region)
 
 /* True global resources - no need for thread safety here */
 static int le_ip2region;
 
+static double getTime()
+{
+	struct timeval tv;
+	struct timezone tz;
+	gettimeofday(&tv, &tz);
+
+	return (tv.tv_sec * 1000 + ((double)tv.tv_usec)/1000);
+}
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
@@ -47,6 +56,71 @@ PHP_INI_END()
 
 /* Every user-visible function in PHP should document itself in the source */
 
+PHP_FUNCTION(d_binary_search)
+{
+	char *arg = NULL;
+	int arg_len, len;
+	char *strg;
+	datablock_t block;
+	ip2region_t resource;
+
+	block 		= emalloc(sizeof(datablock_entry));
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {
+		return;
+	}
+
+	resource 	= emalloc(sizeof(ip2region_entry));
+
+
+	if (ip2region_create( resource, IP2REGION_G(db_file)) == 0)
+	{
+		return;
+	}
+
+	
+    ip2region_binary_search_string(resource, arg, block); 
+
+	// return array
+	array_init(return_value);
+	add_assoc_long(return_value, "cityId", block->city_id);
+	add_assoc_string(return_value, "region", block->region, 1);
+
+	ip2region_destroy(resource);
+}
+
+PHP_FUNCTION(d_btree_search)
+{
+	char *arg = NULL;
+	int arg_len, len;
+	char *strg;
+	datablock_t block;
+	ip2region_t resource;
+
+	block 		= emalloc(sizeof(datablock_entry));
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {
+		return;
+	}
+
+	resource 	= emalloc(sizeof(ip2region_entry));
+
+
+	if (ip2region_create( resource, IP2REGION_G(db_file)) == 0)
+	{
+		return;
+	}
+
+	
+    ip2region_btree_search_string(resource, arg, block); 
+
+	// return array
+	array_init(return_value);
+	add_assoc_long(return_value, "cityId", block->city_id);
+	add_assoc_string(return_value, "region", block->region, 1);
+
+	ip2region_destroy(resource);
+}
 /* {{{ */
 PHP_FUNCTION(btree_search)
 {
@@ -56,6 +130,7 @@ PHP_FUNCTION(btree_search)
 	zval * arg1;
 	datablock_t block;
 	ip2region_t resource;
+	double s_time, c_time;
 
 	block 		= emalloc(sizeof(datablock_entry));
 
@@ -67,12 +142,18 @@ PHP_FUNCTION(btree_search)
 
 	ZEND_FETCH_RESOURCE( resource, ip2region_t, &arg1, -1, le_ip2region_name, le_ip2region  );
 	
+	s_time = getTime();
     ip2region_btree_search_string(resource, arg, block); 
+	c_time = getTime() - s_time;
+
+	
+	//zend_printf("%d|%s in %.5f millseconds\n", block->city_id, block->region, c_time);
 
 	// return array
 	array_init(return_value);
 	add_assoc_long(return_value, "cityId", block->city_id);
 	add_assoc_string(return_value, "region", block->region, 1);
+	add_assoc_double(return_value, "taken", c_time);
 }
 /* }}} */
 
@@ -211,9 +292,7 @@ PHP_MINFO_FUNCTION(ip2region)
 	php_info_print_table_header(2, "ip2region support", "enabled");
 	php_info_print_table_end();
 
-	/* Remove comments if you have entries in php.ini
 	DISPLAY_INI_ENTRIES();
-	*/
 }
 /* }}} */
 
@@ -222,9 +301,11 @@ PHP_MINFO_FUNCTION(ip2region)
  * Every user visible function must have an entry in ip2region_functions[].
  */
 const zend_function_entry ip2region_functions[] = {
-	PHP_FE(binary_search, NULL)
 	PHP_FE(ip2region_create, NULL)
+	PHP_FE(binary_search, NULL)
 	PHP_FE(btree_search, NULL)
+	PHP_FE(d_btree_search, NULL)
+	PHP_FE(d_binary_search, NULL)
 	PHP_FE_END	/* Must be the last line in ip2region_functions[] */
 };
 /* }}} */
