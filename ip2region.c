@@ -26,6 +26,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_ip2region.h"
+#include "lib/ip2region.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(ip2region)
 
