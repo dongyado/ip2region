@@ -131,7 +131,7 @@ void ip2region_destruction_handler(
 
 	resource = (ip2region_t) rsrc->ptr;
 
-	zend_printf("\n+-- destruction handler called! --+\n");
+	//zend_printf("\n+-- destruction handler called! --+\n");
 
 	fclose(resource->dbHandler);
 
