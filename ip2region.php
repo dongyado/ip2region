@@ -1,4 +1,8 @@
 <?php
+/**
+ * test shell for ip2region for php
+ *
+ * */
 $br = (php_sapi_name() == "cli")? "":"<br>";
 
 if(!extension_loaded('ip2region')) {
@@ -52,9 +56,18 @@ function classBinarySearch($ip2region, $ip)
     echo "taken: ", ($end - $start), "\n";
 }
 
-classBtreeSearch( $ip2region, "120.24.67.3");
-classBtreeSearch( $ip2region, "120.24.67.3");
-classBinarySearch($ip2region, "120.24.67.3");
-classBinarySearch($ip2region, "120.24.67.3");
 
+function test($ip2region){
+    $v1 = rand(0,255);
+    $v2 = rand(0,255);
+    $v3 = rand(0,255);
+    $v4 = rand(0,255);
+    classBtreeSearch( $ip2region, "{$v1}.{$v2}.{$v3}.{$v4}");
+}
+
+while(true)
+{
+    test($ip2region);
+    usleep(5000);
+}
 ?>
