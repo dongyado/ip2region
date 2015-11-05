@@ -36,6 +36,9 @@ static int le_ip2region;
 ip2region_entry  g_resource;
 datablock_entry  g_block;
 
+// class
+static zend_class_entry *ip2region_class_entry_ptr;
+
 static double getTime()
 {
 	struct timeval tv;
@@ -124,42 +127,6 @@ void ip2region_destruction_handler(
 	//ip2region_destroy(&g_resource);
 }
 
-/* {{{ PHP_MINIT_FUNCTION
- */
-PHP_MINIT_FUNCTION(ip2region)
-{
-	REGISTER_INI_ENTRIES();
-
-	if (ip2region_create( &g_resource, IP2REGION_G(db_file)) != 0)
-	{
-	}
-
-	le_ip2region = zend_register_list_destructors_ex(
-		ip2region_destruction_handler, NULL, le_ip2region_name, module_number);
-	return SUCCESS;
-}
-/* }}} */
-
-
-/* {{{ create ip2region resource 
- */
-//PHP_FUNCTION(ip2region_create){
-//	ip2region_t 	resource;
-//	int 			rsrc_id;
-//	zval*			res;
-//
-//	MAKE_STD_ZVAL(res);
-//	resource 	= emalloc(sizeof(ip2region_t));
-//
-//	if (ip2region_create( resource, IP2REGION_G(db_file)) != 0)
-//	{
-//		_rsrc_id = ZEND_REGISTER_RESOURCE( res, resource, le_ip2region);
-//		zend_printf("\n __r : %d\n", (*res).value.lval);
-//	}
-//
-//	RETURN_RESOURCE( rsrc_id );
-//}
-/* }}} */
 
 
 /* {{{ PHP_MSHUTDOWN_FUNCTION
@@ -202,6 +169,30 @@ PHP_MINFO_FUNCTION(ip2region)
 }
 /* }}} */
 
+
+PHP_FUNCTION(ip2region_init){
+
+	if ( !getThis() )
+	{
+		zend_error( E_ERROR, "'ip2region_init()' cannot be classed directly. user New Ip2region() instead" );
+	}
+
+	object_init_ex( getThis(), ip2region_class_entry_ptr );
+	add_property_long( getThis(), "intval", 123 );
+}
+/* {{{ ip2region_class_functions[]
+ *
+ * Every user visible function must have an entry in ip2region_functions[].
+ */
+const zend_function_entry ip2region_class_functions[] = {
+	PHP_FALIAS(ip2region, ip2region_init, NULL)
+	PHP_FE(btreeSearch, NULL)
+	PHP_FE(binarySearch, NULL)
+	PHP_FE_END	/* Must be the last line in ip2region_functions[] */
+};
+/* }}} */
+
+
 /* {{{ ip2region_functions[]
  *
  * Every user visible function must have an entry in ip2region_functions[].
@@ -213,6 +204,29 @@ const zend_function_entry ip2region_functions[] = {
 };
 /* }}} */
 
+/* {{{ PHP_MINIT_FUNCTION
+ */
+PHP_MINIT_FUNCTION(ip2region)
+{
+	zend_class_entry ip2region_class_entry;
+
+	REGISTER_INI_ENTRIES();
+
+	if (ip2region_create( &g_resource, IP2REGION_G(db_file)) != 0)
+	{
+	}
+
+	le_ip2region = zend_register_list_destructors_ex(
+		ip2region_destruction_handler, NULL, le_ip2region_name, module_number);
+
+	// init class
+	INIT_CLASS_ENTRY( ip2region_class_entry, "ip2region", ip2region_class_functions);
+	ip2region_class_entry_ptr = 
+		zend_register_internal_class(&ip2region_class_entry TSRMLS_CC);
+
+	return SUCCESS;
+}
+/* }}} */
 /* {{{ ip2region_module_entry
  */
 zend_module_entry ip2region_module_entry = {
