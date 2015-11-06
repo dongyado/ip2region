@@ -38,78 +38,125 @@ ip2region_entry  g_resource;
 // class
 static zend_class_entry *ip2region_class_entry_ptr;
 
-static double getTime()
-{
-	struct timeval tv;
-	struct timezone tz;
-	gettimeofday(&tv, &tz);
 
-	return (tv.tv_sec * 1000 + ((double)tv.tv_usec)/1000);
+//static double getTime()
+//{
+//	struct timeval tv;
+//	struct timezone tz;
+//	gettimeofday(&tv, &tz);
+//
+//	return (tv.tv_sec * 1000 + ((double)tv.tv_usec)/1000);
+//}
+
+
+/**
+ * format result
+ * */
+void format_result(zval ** return_value, datablock_t _block)
+{
+	array_init( *return_value );
+	add_assoc_long( *return_value,   "cityId", (*_block).city_id);
+	add_assoc_string( *return_value, "region", (*_block).region, 1);
 }
+
+
+//void search(uint_t (*func_ptr) (ip2region_t, uint_t, datablock_t), ip2region_t g_resouce, long ip, zval ** return_value, datablock_t _block)
+//{
+//	func(g_resouce, (uint_t) ip, _block);
+//	array_init( *return_value );
+//	add_assoc_long( *return_value,   "cityId", (*_block).city_id);
+//	add_assoc_string( *return_value, "region", (*_block).region, 1);
+//}
+
+
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
-    //STD_PHP_INI_ENTRY("ip2region.global_value",      "42", PHP_INI_ALL, OnUpdateLong, global_value, zend_ip2region_globals, ip2region_globals)
     STD_PHP_INI_ENTRY("ip2region.db_file", "", PHP_INI_ALL, OnUpdateString, db_file, zend_ip2region_globals, ip2region_globals)
 PHP_INI_END()
 /* }}} */
 
 
 /* {{{ 
- *  btree search
+ *  btree search string
  * */
-PHP_METHOD(ip2region_class_entry_ptr, btreeSearch)
+PHP_METHOD(ip2region_class_entry_ptr, btreeSearchString)
 {
-	char *arg = NULL;
-	int arg_len, len;
-	double s_time, c_time;
+	char *ip = NULL;
+	int arg_len;
 	datablock_entry  _block;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &ip, &arg_len) == FAILURE) {
 		return;
 	}
 
 	// search
-	s_time = getTime();
-    ip2region_btree_search_string(&g_resource, arg, &_block); 
-	c_time = getTime() - s_time;
+	ip2region_btree_search_string(&g_resource, ip, &_block);
+
+	format_result(&return_value, &_block);
+}
+/* }}} */
+
+
+
+/* {{{ 
+ *  btree search 
+ * */
+PHP_METHOD(ip2region_class_entry_ptr, btreeSearch)
+{
+	long ip;
+	datablock_entry  _block;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &ip) == FAILURE) {
+		return;
+	}
+
+	// search
+    ip2region_btree_search(&g_resource, ip, &_block); 
 
 	// return 
-	array_init(return_value);
-	add_assoc_long(return_value,   "cityId", _block.city_id);
-	add_assoc_string(return_value, "region", _block.region, 1);
-	add_assoc_double(return_value, "taken",  c_time);
+	format_result(&return_value, &_block);
 }
 /* }}} */
 
 
 /* {{{
- * binary search
+ * binary search string
  * */
-PHP_METHOD(ip2region_class_entry_ptr,  binarySearch)
+PHP_METHOD(ip2region_class_entry_ptr,  binarySearchString)
 {
-	char *arg = NULL;
-	int arg_len, len;
+	char *ip = NULL;
+	int arg_len;
 	datablock_entry  _block;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &ip, &arg_len) == FAILURE) {
 		return;
 	}
 
-    ip2region_binary_search_string(&g_resource, arg, &_block); 
+    ip2region_binary_search_string(&g_resource, ip, &_block); 
 
-	// return array
-	array_init(return_value);
-	add_assoc_long(return_value,   "cityId", _block.city_id);
-	add_assoc_string(return_value, "region", _block.region, 1);
+	format_result(&return_value, &_block);
 }
 /* }}} */
 
-/* The previous line is meant for vim and emacs, so it can correctly fold and 
-   unfold functions in source code. See the corresponding marks just before 
-   function definition, where the functions purpose is also documented. Please 
-   follow this convention for the convenience of others editing your code.
-*/
+
+/* {{{
+ * binary search 
+ * */
+PHP_METHOD(ip2region_class_entry_ptr,  binarySearch)
+{
+	long ip;
+	datablock_entry  _block;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &ip) == FAILURE) {
+		return;
+	}
+
+    ip2region_binary_search(&g_resource, ip, &_block); 
+
+	format_result(&return_value, &_block);
+}
+/* }}} */
 
 
 /* {{{ php_ip2region_init_globals
@@ -119,6 +166,8 @@ static void php_ip2region_init_globals(zend_ip2region_globals *ip2region_globals
 	ip2region_globals->db_file = NULL;
 }
 /* }}} */
+
+
 
 /** 
  * destruction
@@ -142,6 +191,7 @@ PHP_MSHUTDOWN_FUNCTION(ip2region)
 }
 /* }}} */
 
+
 /* Remove if there's nothing to do at request start */
 /* {{{ PHP_RINIT_FUNCTION
  */
@@ -150,6 +200,7 @@ PHP_RINIT_FUNCTION(ip2region)
 	return SUCCESS;
 }
 /* }}} */
+
 
 /* Remove if there's nothing to do at request end */
 /* {{{ PHP_RSHUTDOWN_FUNCTION
@@ -173,6 +224,7 @@ PHP_MINFO_FUNCTION(ip2region)
 }
 /* }}} */
 
+
 PHP_FUNCTION(ip2region_init){
 
 	if ( !getThis() )
@@ -195,8 +247,12 @@ PHP_FUNCTION(ip2region_init){
 //	PHP_FE(binarySearch, NULL)
 //	PHP_FE_END	/* Must be the last line in ip2region_functions[] */
 //};
+
+
 const zend_function_entry ip2region_class_functions[] = {
-	PHP_ME( ip2region_class_entry_ptr,  btreeSearch, NULL, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME( ip2region_class_entry_ptr,  btreeSearchString,  NULL, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME( ip2region_class_entry_ptr,  binarySearchString, NULL, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC )
+	PHP_ME( ip2region_class_entry_ptr,  btreeSearch,  NULL, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME( ip2region_class_entry_ptr,  binarySearch, NULL, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC )
 	PHP_FE_END	/* Must be the last line in ip2region_functions[] */
 };
@@ -212,6 +268,7 @@ const zend_function_entry ip2region_functions[] = {
 };
 /* }}} */
 
+
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(ip2region)
@@ -219,9 +276,9 @@ PHP_MINIT_FUNCTION(ip2region)
 	REGISTER_INI_ENTRIES();
 	zend_class_entry ip2region_class_entry;
 
-
-	if (ip2region_create( &g_resource, IP2REGION_G(db_file)) != 0)
+	if (ip2region_create( &g_resource, IP2REGION_G(db_file)) == 0)
 	{
+		// the db file not found or create ip2region object error
 	}
 
 	le_ip2region = zend_register_list_destructors_ex(
@@ -235,6 +292,8 @@ PHP_MINIT_FUNCTION(ip2region)
 	return SUCCESS;
 }
 /* }}} */
+
+
 /* {{{ ip2region_module_entry
  */
 zend_module_entry ip2region_module_entry = {
@@ -250,6 +309,7 @@ zend_module_entry ip2region_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
+
 
 #ifdef COMPILE_DL_IP2REGION
 ZEND_GET_MODULE(ip2region)

@@ -62,11 +62,13 @@ ZEND_END_MODULE_GLOBALS(ip2region)
 
 #endif	/* PHP_IP2REGION_H */
 
-// typedef ip2region_entry ip2region_resource;
-
 void ip2region_destruction_handler( zend_rsrc_list_entry *rsrc TSRMLS_DC );
-
 #define le_ip2region_name "Ip2region"
+
+
+// format result
+void format_result(zval ** , datablock_t);
+//void search( uint_t (*func_ptr) (ip2region_t, uint_t, datablock_t), ip3region_t, long , zval **, datablock_t);
 
 /*
  * Local variables:

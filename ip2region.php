@@ -19,20 +19,32 @@ function classBtreeSearch( $ip)
 
     $start = getTime();
     //$data  = $ip2region->btreeSearch($ip);
-    $data  = Ip2region::btreeSearch($ip);
+    $data  = Ip2region::btreeSearchString($ip);
     $end   = getTime();
     var_dump($data);
-    echo "taken: ", ($end - $start), "\n";
+    echo " btree search string - taken: ", ($end - $start), "\n";
+
+    $start = getTime();
+    $data  = Ip2region:: btreeSearch(ip2long($ip));
+    $end   = getTime();
+    var_dump($data);
+    echo " btree search - taken: ", ($end - $start), "\n";
 }
 
 function classBinarySearch($ip)
 {
 
     $start = getTime();
-    $data  = Ip2region::binarySearch($ip);
+    $data  = Ip2region::binarySearchString($ip);
     $end   = getTime();
     var_dump($data);
-    echo "taken: ", ($end - $start), "\n";
+    echo " binary search string -taken: ", ($end - $start), "\n";
+
+    $start = getTime();
+    $data  = Ip2region::binarySearch(ip2long($ip));
+    $end   = getTime();
+    var_dump($data);
+    echo " binary search - taken: ", ($end - $start), "\n";
 }
 
 
@@ -49,6 +61,7 @@ function test(){
 while(true)
 {
     test();
+    break;
     usleep(5000);
 }
 ?>
