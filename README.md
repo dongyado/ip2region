@@ -6,7 +6,7 @@ ip2region 的PHP拓展，原项目https://git.oschina.net/lionsoul/ip2region.git
     
         git clone https://git.oschina.net/monsterkiller/ip2region.git
 
-* 运行 
+* 在ext/ip2region下，运行 
 
         phpize
         ./configure
@@ -18,9 +18,11 @@ ip2region 的PHP拓展，原项目https://git.oschina.net/lionsoul/ip2region.git
         ip2region.db_file=/path/to/ip2region.db
 
 * 测试 
+
 在ext/ip2region/下运行
     
         php ip2region.php
 
 ### 使用
+
 参考ip2region/ip2region.php
