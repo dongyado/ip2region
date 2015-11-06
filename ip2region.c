@@ -33,6 +33,7 @@ ZEND_DECLARE_MODULE_GLOBALS(ip2region)
 
 /* True global resources - no need for thread safety here */
 static int le_ip2region;
+ip2region_t      g_resource_ptr;
 ip2region_entry  g_resource;
 
 // class
@@ -52,21 +53,38 @@ static zend_class_entry *ip2region_class_entry_ptr;
 /**
  * format result
  * */
-void format_result(zval ** return_value, datablock_t _block)
-{
-	array_init( *return_value );
-	add_assoc_long( *return_value,   "cityId", (*_block).city_id);
-	add_assoc_string( *return_value, "region", (*_block).region, 1);
-}
-
-
-//void search(uint_t (*func_ptr) (ip2region_t, uint_t, datablock_t), ip2region_t g_resouce, long ip, zval ** return_value, datablock_t _block)
+//void format_result(zval ** return_value, datablock_t _block)
 //{
-//	func(g_resouce, (uint_t) ip, _block);
 //	array_init( *return_value );
 //	add_assoc_long( *return_value,   "cityId", (*_block).city_id);
 //	add_assoc_string( *return_value, "region", (*_block).region, 1);
 //}
+
+
+void search(
+		ip2region_t g_resouce_ptr, 
+		uint_t (*func_ptr) (ip2region_t, uint_t, datablock_t), 
+		long ip, 
+		zval ** return_value, 
+		datablock_t _block)
+{
+	int res = 0;
+
+	if (g_resource_ptr != NULL){
+		res 	= (*func_ptr)(g_resouce_ptr, (uint_t) ip, _block);
+	}
+
+	array_init( *return_value );
+
+	if ( res == 1 )
+	{
+		add_assoc_long( *return_value,   "cityId", (*_block).city_id);
+		add_assoc_string( *return_value, "region", (*_block).region, 1);
+	} else {
+		add_assoc_long( *return_value,   "cityId", 0);
+		add_assoc_string( *return_value, "region", "[Error] Search Failed! Please check the  path of ip2region db file.", 1);
+	}
+}
 
 
 /* {{{ PHP_INI
@@ -85,15 +103,15 @@ PHP_METHOD(ip2region_class_entry_ptr, btreeSearchString)
 	char *ip = NULL;
 	int arg_len;
 	datablock_entry  _block;
+	uint_t (*func_ptr) (ip2region_t, uint_t, datablock_t);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &ip, &arg_len) == FAILURE) {
 		return;
 	}
 
-	// search
-	ip2region_btree_search_string(&g_resource, ip, &_block);
+	func_ptr = ip2region_btree_search;
 
-	format_result(&return_value, &_block);
+	search(g_resource_ptr, func_ptr, ip2long(ip), &return_value, &_block);
 }
 /* }}} */
 
@@ -106,16 +124,15 @@ PHP_METHOD(ip2region_class_entry_ptr, btreeSearch)
 {
 	long ip;
 	datablock_entry  _block;
+	uint_t (*func_ptr) (ip2region_t, uint_t, datablock_t);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &ip) == FAILURE) {
 		return;
 	}
 
-	// search
-    ip2region_btree_search(&g_resource, ip, &_block); 
+	func_ptr = ip2region_btree_search;
 
-	// return 
-	format_result(&return_value, &_block);
+	search(g_resource_ptr, func_ptr, ip, &return_value, &_block);
 }
 /* }}} */
 
@@ -128,14 +145,15 @@ PHP_METHOD(ip2region_class_entry_ptr,  binarySearchString)
 	char *ip = NULL;
 	int arg_len;
 	datablock_entry  _block;
+	uint_t (*func_ptr) (ip2region_t, uint_t, datablock_t);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &ip, &arg_len) == FAILURE) {
 		return;
 	}
 
-    ip2region_binary_search_string(&g_resource, ip, &_block); 
+	func_ptr = ip2region_binary_search;
 
-	format_result(&return_value, &_block);
+	search(g_resource_ptr, func_ptr, ip2long(ip), &return_value, &_block);
 }
 /* }}} */
 
@@ -147,14 +165,14 @@ PHP_METHOD(ip2region_class_entry_ptr,  binarySearch)
 {
 	long ip;
 	datablock_entry  _block;
+	uint_t (*func_ptr) (ip2region_t, uint_t, datablock_t);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &ip) == FAILURE) {
 		return;
 	}
 
-    ip2region_binary_search(&g_resource, ip, &_block); 
-
-	format_result(&return_value, &_block);
+	func_ptr = ip2region_binary_search;
+	search(g_resource_ptr, func_ptr, ip, &return_value, &_block);
 }
 /* }}} */
 
@@ -225,18 +243,6 @@ PHP_MINFO_FUNCTION(ip2region)
 /* }}} */
 
 
-PHP_FUNCTION(ip2region_init){
-
-	if ( !getThis() )
-	{
-		zend_error( E_ERROR, "'ip2region_init()' cannot be classed directly. user New Ip2region() instead" );
-	}
-
-	object_init_ex( getThis(), ip2region_class_entry_ptr );
-	add_property_long( getThis(), "intval", 123 );
-}
-
-
 /* {{{ ip2region_class_functions[]
  *
  * Every user visible function must have an entry in ip2region_functions[].
@@ -278,8 +284,11 @@ PHP_MINIT_FUNCTION(ip2region)
 
 	if (ip2region_create( &g_resource, IP2REGION_G(db_file)) == 0)
 	{
-		// the db file not found or create ip2region object error
+		g_resource_ptr = NULL;
+	} else {
+		g_resource_ptr = &g_resource;
 	}
+
 
 	le_ip2region = zend_register_list_destructors_ex(
 		ip2region_destruction_handler, NULL, le_ip2region_name, module_number);

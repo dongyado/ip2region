@@ -29,6 +29,7 @@ IP2R_API uint_t ip2region_create(ip2region_t ip2rObj, char *dbFile)
 	if ( ip2rObj->HeaderPtr == NULL )
 	{
 		IP2R_FREE(ip2rObj->HeaderSip);
+        ip2rObj->HeaderSip = NULL;
 		return 0;
 	}
     
@@ -37,6 +38,10 @@ IP2R_API uint_t ip2region_create(ip2region_t ip2rObj, char *dbFile)
 	ip2rObj->dbHandler = fopen(dbFile, "rb");
 	if ( ip2rObj->dbHandler == NULL  )
 	{
+		IP2R_FREE(ip2rObj->HeaderSip);
+        ip2rObj->HeaderSip = NULL;
+		IP2R_FREE(ip2rObj->HeaderPtr);
+        ip2rObj->HeaderPtr = NULL;
 		return 0;
 	}
 
@@ -60,7 +65,8 @@ IP2R_API uint_t ip2region_destroy(ip2region_t ip2rObj)
 	ip2rObj->HeaderPtr = NULL;
 
 	//close the db file resource
-	fclose(ip2rObj->dbHandler);
+    if (ip2rObj->dbHandler != NULL)
+        fclose(ip2rObj->dbHandler);
 
 	return 1;
 }
