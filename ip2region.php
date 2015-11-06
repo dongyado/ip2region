@@ -13,61 +13,42 @@ function getTime(){
     return microtime(true) * 1000;
 }
 
-//$start = getTime();
-//$data  = btreeSearch("120.24.78.68");
-//$end   = getTime();
-//var_dump($data);
-//echo "taken: ", ($end - $start), "\n";
-//
-//$start = getTime();
-//$data  = btreeSearch("30.24.78.68");
-//$end   = getTime();
-//var_dump($data);
-//echo "taken: ", ($end - $start), "\n";
-//
-//
-//$start = getTime();
-//$data  = binarySearch("200.24.78.68");
-//$end   = getTime();
-//var_dump($data);
-//echo "taken: ", ($end - $start), "\n";
-
-
-
 // test class
-$ip2region = new Ip2region();
-function classBtreeSearch($ip2region, $ip)
+function classBtreeSearch( $ip)
 {
 
     $start = getTime();
-    $data  = $ip2region->btreeSearch($ip);
+    //$data  = $ip2region->btreeSearch($ip);
+    $data  = Ip2region::btreeSearch($ip);
     $end   = getTime();
     var_dump($data);
     echo "taken: ", ($end - $start), "\n";
 }
 
-function classBinarySearch($ip2region, $ip)
+function classBinarySearch($ip)
 {
 
     $start = getTime();
-    $data  = $ip2region->binarySearch($ip);
+    $data  = Ip2region::binarySearch($ip);
     $end   = getTime();
     var_dump($data);
     echo "taken: ", ($end - $start), "\n";
 }
 
 
-function test($ip2region){
+function test(){
     $v1 = rand(0,255);
     $v2 = rand(0,255);
     $v3 = rand(0,255);
     $v4 = rand(0,255);
-    classBtreeSearch( $ip2region, "{$v1}.{$v2}.{$v3}.{$v4}");
+    $ip = "{$v1}.{$v2}.{$v3}.{$v4}";
+    classBtreeSearch( $ip );
+    classBinarySearch( $ip );
 }
 
 while(true)
 {
-    test($ip2region);
+    test();
     usleep(5000);
 }
 ?>

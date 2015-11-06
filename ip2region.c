@@ -34,7 +34,6 @@ ZEND_DECLARE_MODULE_GLOBALS(ip2region)
 /* True global resources - no need for thread safety here */
 static int le_ip2region;
 ip2region_entry  g_resource;
-datablock_entry  g_block;
 
 // class
 static zend_class_entry *ip2region_class_entry_ptr;
@@ -55,15 +54,16 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
+
 /* {{{ 
  *  btree search
  * */
-PHP_FUNCTION(btreeSearch)
+PHP_METHOD(ip2region_class_entry_ptr, btreeSearch)
 {
-
 	char *arg = NULL;
 	int arg_len, len;
 	double s_time, c_time;
+	datablock_entry  _block;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {
 		return;
@@ -71,34 +71,37 @@ PHP_FUNCTION(btreeSearch)
 
 	// search
 	s_time = getTime();
-    ip2region_btree_search_string(&g_resource, arg, &g_block); 
+    ip2region_btree_search_string(&g_resource, arg, &_block); 
 	c_time = getTime() - s_time;
 
 	// return 
 	array_init(return_value);
-	add_assoc_long(return_value,   "cityId", g_block.city_id);
-	add_assoc_string(return_value, "region", g_block.region, 1);
+	add_assoc_long(return_value,   "cityId", _block.city_id);
+	add_assoc_string(return_value, "region", _block.region, 1);
 	add_assoc_double(return_value, "taken",  c_time);
 }
 /* }}} */
 
 
-/* {{{ */
-PHP_FUNCTION(binarySearch)
+/* {{{
+ * binary search
+ * */
+PHP_METHOD(ip2region_class_entry_ptr,  binarySearch)
 {
 	char *arg = NULL;
 	int arg_len, len;
+	datablock_entry  _block;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {
 		return;
 	}
 
-    ip2region_binary_search_string(&g_resource, arg, &g_block); 
+    ip2region_binary_search_string(&g_resource, arg, &_block); 
 
 	// return array
 	array_init(return_value);
-	add_assoc_long(return_value,   "cityId", g_block.city_id);
-	add_assoc_string(return_value, "region", g_block.region, 1);
+	add_assoc_long(return_value,   "cityId", _block.city_id);
+	add_assoc_string(return_value, "region", _block.region, 1);
 }
 /* }}} */
 
@@ -157,6 +160,7 @@ PHP_RSHUTDOWN_FUNCTION(ip2region)
 }
 /* }}} */
 
+
 /* {{{ PHP_MINFO_FUNCTION
  */
 PHP_MINFO_FUNCTION(ip2region)
@@ -169,7 +173,6 @@ PHP_MINFO_FUNCTION(ip2region)
 }
 /* }}} */
 
-
 PHP_FUNCTION(ip2region_init){
 
 	if ( !getThis() )
@@ -180,14 +183,21 @@ PHP_FUNCTION(ip2region_init){
 	object_init_ex( getThis(), ip2region_class_entry_ptr );
 	add_property_long( getThis(), "intval", 123 );
 }
+
+
 /* {{{ ip2region_class_functions[]
  *
  * Every user visible function must have an entry in ip2region_functions[].
  */
+//const zend_function_entry ip2region_class_functions[] = {
+//	PHP_FALIAS(ip2region, ip2region_init, NULL)
+//	PHP_FE(btreeSearch, NULL)
+//	PHP_FE(binarySearch, NULL)
+//	PHP_FE_END	/* Must be the last line in ip2region_functions[] */
+//};
 const zend_function_entry ip2region_class_functions[] = {
-	PHP_FALIAS(ip2region, ip2region_init, NULL)
-	PHP_FE(btreeSearch, NULL)
-	PHP_FE(binarySearch, NULL)
+	PHP_ME( ip2region_class_entry_ptr,  btreeSearch, NULL, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME( ip2region_class_entry_ptr,  binarySearch, NULL, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC )
 	PHP_FE_END	/* Must be the last line in ip2region_functions[] */
 };
 /* }}} */
@@ -198,8 +208,6 @@ const zend_function_entry ip2region_class_functions[] = {
  * Every user visible function must have an entry in ip2region_functions[].
  */
 const zend_function_entry ip2region_functions[] = {
-	PHP_FE(btreeSearch, NULL)
-	PHP_FE(binarySearch, NULL)
 	PHP_FE_END	/* Must be the last line in ip2region_functions[] */
 };
 /* }}} */
@@ -208,9 +216,9 @@ const zend_function_entry ip2region_functions[] = {
  */
 PHP_MINIT_FUNCTION(ip2region)
 {
+	REGISTER_INI_ENTRIES();
 	zend_class_entry ip2region_class_entry;
 
-	REGISTER_INI_ENTRIES();
 
 	if (ip2region_create( &g_resource, IP2REGION_G(db_file)) != 0)
 	{
