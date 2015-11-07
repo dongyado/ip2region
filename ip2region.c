@@ -12,7 +12,7 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author:                                                              |
+  | Author: dongyado<dongyado@gmail.com>                                 |
   +----------------------------------------------------------------------+
 */
 
@@ -47,17 +47,6 @@ static zend_class_entry *ip2region_class_entry_ptr;
 //	gettimeofday(&tv, &tz);
 //
 //	return (tv.tv_sec * 1000 + ((double)tv.tv_usec)/1000);
-//}
-
-
-/**
- * format result
- * */
-//void format_result(zval ** return_value, datablock_t _block)
-//{
-//	array_init( *return_value );
-//	add_assoc_long( *return_value,   "cityId", (*_block).city_id);
-//	add_assoc_string( *return_value, "region", (*_block).region, 1);
 //}
 
 
@@ -247,14 +236,6 @@ PHP_MINFO_FUNCTION(ip2region)
  *
  * Every user visible function must have an entry in ip2region_functions[].
  */
-//const zend_function_entry ip2region_class_functions[] = {
-//	PHP_FALIAS(ip2region, ip2region_init, NULL)
-//	PHP_FE(btreeSearch, NULL)
-//	PHP_FE(binarySearch, NULL)
-//	PHP_FE_END	/* Must be the last line in ip2region_functions[] */
-//};
-
-
 const zend_function_entry ip2region_class_functions[] = {
 	PHP_ME( ip2region_class_entry_ptr,  btreeSearchString,  NULL, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME( ip2region_class_entry_ptr,  binarySearchString, NULL, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC )

@@ -15,6 +15,7 @@ echo "ip2region extension is available";
 
 	see php5/README.TESTING for further information on
   writing regression tests
+
 */
 ?>
 --EXPECT--

@@ -12,7 +12,7 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author:                                                              |
+  | Author:  dongyado<dongyado@gmail.com>                                |
   +----------------------------------------------------------------------+
 */
 
@@ -66,9 +66,7 @@ void ip2region_destruction_handler( zend_rsrc_list_entry *rsrc TSRMLS_DC );
 #define le_ip2region_name "Ip2region"
 
 
-// format result
-void format_result(zval ** , datablock_t);
-//void search( uint_t (*func_ptr) (ip2region_t, uint_t, datablock_t), ip3region_t, long , zval **, datablock_t);
+void search( ip2region_t, uint_t (*func_ptr) (ip2region_t, uint_t, datablock_t), long , zval **, datablock_t);
 
 /*
  * Local variables:
