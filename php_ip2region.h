@@ -62,7 +62,6 @@ ZEND_END_MODULE_GLOBALS(ip2region)
 
 #endif	/* PHP_IP2REGION_H */
 
-void ip2region_destruction_handler( zend_rsrc_list_entry *rsrc TSRMLS_DC );
 #define le_ip2region_name "Ip2region"
 
 

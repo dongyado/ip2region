@@ -176,18 +176,6 @@ static void php_ip2region_init_globals(zend_ip2region_globals *ip2region_globals
 
 
 
-/** 
- * destruction
- * */
-
-void ip2region_destruction_handler(
-	zend_rsrc_list_entry *rsrc TSRMLS_CC
-) {
-	//ip2region_destroy(&g_resource);
-}
-
-
-
 /* {{{ PHP_MSHUTDOWN_FUNCTION
  */
 PHP_MSHUTDOWN_FUNCTION(ip2region)
@@ -271,8 +259,8 @@ PHP_MINIT_FUNCTION(ip2region)
 	}
 
 
-	le_ip2region = zend_register_list_destructors_ex(
-		ip2region_destruction_handler, NULL, le_ip2region_name, module_number);
+	//le_ip2region = zend_register_list_destructors_ex(
+	//	ip2region_destruction_handler, NULL, le_ip2region_name, module_number);
 
 	// init class
 	INIT_CLASS_ENTRY( ip2region_class_entry, "ip2region", ip2region_class_functions);
