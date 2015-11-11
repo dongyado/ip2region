@@ -33,8 +33,8 @@ ZEND_DECLARE_MODULE_GLOBALS(ip2region)
 
 /* True global resources - no need for thread safety here */
 static int le_ip2region;
-ip2region_t      g_resource_ptr;
-ip2region_entry  g_resource;
+static ip2region_t      g_resource_ptr;
+static ip2region_entry  g_resource;
 
 // class
 static zend_class_entry *ip2region_class_entry_ptr;
@@ -76,10 +76,19 @@ void search(
 }
 
 
+/* {{{ php_ip2region_init_globals
+ */
+static void php_ip2region_init_globals(zend_ip2region_globals *ip2region_globals)
+{
+	ip2region_globals->db_file = NULL;
+}
+/* }}} */
+
+
 /* {{{ PHP_INI
  */
 PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("ip2region.db_file", "", PHP_INI_ALL, OnUpdateString, db_file, zend_ip2region_globals, ip2region_globals)
+    STD_PHP_INI_ENTRY("ip2region.db_file", NULL, PHP_INI_ALL, OnUpdateString, db_file, zend_ip2region_globals, ip2region_globals)
 PHP_INI_END()
 /* }}} */
 
@@ -166,14 +175,6 @@ PHP_METHOD(ip2region_class_entry_ptr,  binarySearch)
 /* }}} */
 
 
-/* {{{ php_ip2region_init_globals
- */
-static void php_ip2region_init_globals(zend_ip2region_globals *ip2region_globals)
-{
-	ip2region_globals->db_file = NULL;
-}
-/* }}} */
-
 
 
 /* {{{ PHP_MSHUTDOWN_FUNCTION
@@ -248,8 +249,13 @@ const zend_function_entry ip2region_functions[] = {
  */
 PHP_MINIT_FUNCTION(ip2region)
 {
-	REGISTER_INI_ENTRIES();
 	zend_class_entry ip2region_class_entry;
+
+	// @NOTE the line should before REGISTRE_INI_ENTRIES, 
+	// and should not comment it when you have glocbals 
+	ZEND_INIT_MODULE_GLOBALS(ip2region, php_ip2region_init_globals, NULL);  
+	REGISTER_INI_ENTRIES();
+
 
 	if (ip2region_create( &g_resource, IP2REGION_G(db_file)) == 0)
 	{

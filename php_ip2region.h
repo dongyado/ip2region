@@ -60,13 +60,14 @@ ZEND_END_MODULE_GLOBALS(ip2region)
 #define IP2REGION_G(v) (ip2region_globals.v)
 #endif
 
-#endif	/* PHP_IP2REGION_H */
+static void php_ip2region_init_globals(zend_ip2region_globals *);
 
 #define le_ip2region_name "Ip2region"
 
 
 void search( ip2region_t, uint_t (*func_ptr) (ip2region_t, uint_t, datablock_t), long , zval **, datablock_t);
 
+#endif	/* PHP_IP2REGION_H */
 /*
  * Local variables:
  * tab-width: 4
