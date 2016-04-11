@@ -68,10 +68,14 @@ void search(
 	if ( res == 1 )
 	{
 		add_assoc_long( *return_value,   "cityId", (*_block).city_id);
-		add_assoc_string( *return_value, "region", (*_block).region, 1);
+		//add_assoc_string( *return_value, "region", (*_block).region, 1);
+		// for phpng
+		add_assoc_string( *return_value, "region", (*_block).region);
 	} else {
 		add_assoc_long( *return_value,   "cityId", 0);
-		add_assoc_string( *return_value, "region", "[Error] Search Failed! Please check the  path of ip2region db file.", 1);
+		//add_assoc_string( *return_value, "region", "[Error] Search Failed! Please check the  path of ip2region db file.", 1);
+		// for phpng
+		add_assoc_string( *return_value, "region", "[Error] Search Failed! Please check the  path of ip2region db file.");
 	}
 }
 
@@ -99,7 +103,7 @@ PHP_INI_END()
 PHP_METHOD(ip2region_class_entry_ptr, btreeSearchString)
 {
 	char *ip = NULL;
-	int arg_len;
+	size_t arg_len;
 	datablock_entry  _block;
 	uint_t (*func_ptr) (ip2region_t, uint_t, datablock_t);
 
@@ -141,7 +145,9 @@ PHP_METHOD(ip2region_class_entry_ptr, btreeSearch)
 PHP_METHOD(ip2region_class_entry_ptr,  binarySearchString)
 {
 	char *ip = NULL;
-	int arg_len;
+	//int arg_len;
+	// for phpng
+	size_t arg_len;
 	datablock_entry  _block;
 	uint_t (*func_ptr) (ip2region_t, uint_t, datablock_t);
 
