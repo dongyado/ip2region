@@ -1,9 +1,19 @@
+ip2region - ip到地区的映射库
+
+数据聚合了一些知名ip到地名查询提供商的数据，这些是他们官方的的准确率，经测试着实比纯真啥的准确多了。
+每次聚合一下数据需要1-2天，会不定时更新。
+
+原项目:
+* github: https://github.com/lionsoul2014/ip2region
+* git@osc: https://git.oschina.net/lionsoul/ip2region.git
+
 #ip2region extension for php
-ip2region 的PHP扩展，原项目https://git.oschina.net/lionsoul/ip2region.git
+为了实现更快的查速度，编写了ip2region的PHP扩展。
 
 ### 版本支持
-php5 ： tag php5
-phpng ： tag phpng
+
+* php5 ： tag php5
+* phpng ： tag phpng
 
 
 ### 安装步骤
