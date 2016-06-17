@@ -1,5 +1,18 @@
 #ip2region extension for php
-ip2region 的PHP扩展，原项目https://git.oschina.net/lionsoul/ip2region.git
+ip2region 的PHP扩展
+
+此项目已经合并到ip2region主项目，不再更新
+
+主项目地址：
+
+github:
+
+https://github.com/lionsoul2016/ip2region
+
+git osc:
+
+https://git.oschina.net/lionsoul/ip2region.git
+
 
 ### 版本支持
 php5 ： tag php5
